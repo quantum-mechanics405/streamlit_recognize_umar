@@ -2,7 +2,6 @@ import cv2
 from mtcnn import MTCNN
 from PIL import Image, ExifTags
 import numpy as np
-import matplotlib.pyplot as plt
 import streamlit as st
 import pickle
 
@@ -55,8 +54,8 @@ def predict_image_class(image):
     return (prediction > 0.5).astype("int32")[0][0]
 
 # Upload image
-imag2 = st.file_uploader('Upload image', type=['jpg', 'jpeg', 'png'])
-# imag2 = st.camera_input('capture image ')
+# imag2 = st.file_uploader('Upload image', type=['jpg', 'jpeg', 'png'])
+imag2 = st.camera_input('capture image ')
 # Process image if uploaded
 if imag2 is not None:
     # Convert uploaded file to a PIL image
