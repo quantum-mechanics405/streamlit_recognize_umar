@@ -39,7 +39,7 @@ def correct_image_orientation(image):
 
 def detect_faces_from_image(image_):
     # img = Image.open(image_path)
-    img = correct_image_orientation(img)
+    img = correct_image_orientation(img_)
     img.thumbnail((1200, 1200))  # Resize for faster detection
     img_rgb = np.array(img)
     faces = detector.detect_faces(img_rgb)
