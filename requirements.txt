@@ -3,5 +3,5 @@ mtcnn
 Pillow
 numpy
 matplotlib
-tensorflow
+# tensorflow
 streamlit

@@ -3,12 +3,11 @@ from mtcnn import MTCNN
 from PIL import Image, ExifTags
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import load_model
 import streamlit as st
 import pickle
 
 
-st.title('Prediction of Logistic regression')
+st.title('Recognizing Umar from Image')
 # Load the model from the file
 with open(r'trained_algo_on_umar1000.pkl', 'rb') as file:
     loaded_model = pickle.load(file)
@@ -38,7 +37,6 @@ def correct_image_orientation(image):
     return image
 
 def detect_faces_from_image(image_):
-    # img = Image.open(image_path)
     img = correct_image_orientation(image_)
     img.thumbnail((1200, 1200))  # Resize for faster detection
     img_rgb = np.array(img)
@@ -56,32 +54,27 @@ def predict_image_class(image):
     prediction = loaded_model.predict(img_array)
     return (prediction > 0.5).astype("int32")[0][0]
 
-# Upload images
-# imag1 = st.file_uploader('Upload image 1', type=['jpg', 'jpeg', 'png'])
-# imag1 = st.camera_input('capture image ')
+# Upload image
 imag2 = st.file_uploader('Upload image 2', type=['jpg', 'jpeg', 'png'])
 
-# Process each image if uploaded
+# Process image if uploaded
 if imag2 is not None:
-    img_rgb, faces = detect_faces_from_image(imag2)
+    # Convert uploaded file to a PIL image
+    image = Image.open(imag2)
+    img_rgb, faces = detect_faces_from_image(image)
+    
+    # Draw rectangles around detected faces and classify them
+    for face in faces:
+        x, y, width, height = face['box']
+        face_img = img_rgb[y:y + height, x:x + width]
+        predicted_class = predict_image_class(face_img)
+        
+        # Draw rectangle and label
+        color, label = ((0, 255, 0), 'Umar') if predicted_class == 0 else ((255, 0, 0), 'Not Umar')
+        cv2.rectangle(img_rgb, (x, y), (x + width, y + height), color, 2)
+        cv2.putText(img_rgb, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+    # Display the result
+    st.image(img_rgb, caption="Detected Faces", use_column_width=True)
 else:
-    # processed_image1 = None
-    st.write("Please upload image.")
-
-# Draw rectangles around detected faces and classify them
-for face in faces:
-    x, y, width, height = face['box']
-    face_img = img_rgb[y:y + height, x:x + width]
-    predicted_class = predict_image_class(face_img)
-    # Draw rectangle and label if it's class A (0)
-    if predicted_class == 0:  # Class A
-        cv2.rectangle(img_rgb, (x, y), (x + width, y + height), (0, 255, 0), 2)  # Green rectangle
-        cv2.putText(img_rgb, 'Umar', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-    else:
-        cv2.rectangle(img_rgb, (x, y), (x + width, y + height), (255, 0, 0), 2)  # Green rectangle
-        cv2.putText(img_rgb, 'Not Umar', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-plt.imshow(img_rgb)
-plt.axis('off')
-plt.show()
-
+    st.write("Please upload an image.")
